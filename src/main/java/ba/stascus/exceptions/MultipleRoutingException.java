@@ -17,6 +17,7 @@ public final class MultipleRoutingException extends RoutingException {
 	private Map<String, Action> actions;
 
 	public MultipleRoutingException(Map<String, Action> availableActions) {
+		super(RoutingExceptionType.MULTIPLE_ROUTES);
 		this.actions = availableActions;
 	}
 

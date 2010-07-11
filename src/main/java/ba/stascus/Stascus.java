@@ -59,7 +59,7 @@ public final class Stascus {
 		try {
 			this.router.route(args);
 		} catch (MultipleRoutingException e) {
-			logger.info("Your command matches various actions in different modules. Please, specify which one wants typing its full name or set up an alias:");
+			logger.info(e.getLocalizedMessage());
 			for (Action action : e.getAvailableActions().values()) {
 				logger.info("\t" + action.toString());
 			}

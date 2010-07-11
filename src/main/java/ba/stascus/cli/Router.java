@@ -10,7 +10,6 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 import ba.stascus.exceptions.ActionException;
-import ba.stascus.exceptions.ExceptionFactory;
 import ba.stascus.exceptions.MultipleRoutingException;
 import ba.stascus.exceptions.RoutingException;
 import ba.stascus.exceptions.RoutingException.RoutingExceptionType;
@@ -83,26 +82,22 @@ public final class Router {
 	public void route(String... args) throws RoutingException, ActionException {
 		if (args == null) {
 			// TODO Maybe route to Help:help action?
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.MISSING_ARGUMENTS);
+			throw new RoutingException(RoutingExceptionType.MISSING_ARGUMENTS);
 		}
 
 		if (args.length == 0) {
 			// TODO Maybe route to Help:help action?
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.MISSING_ARGUMENTS);
+			throw new RoutingException(RoutingExceptionType.MISSING_ARGUMENTS);
 		}
 
 		if (args[0] == null) {
 			// TODO Maybe route to Help:help action?
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.MISSING_ARGUMENTS);
+			throw new RoutingException(RoutingExceptionType.MISSING_ARGUMENTS);
 		}
 
 		String actionCommand = args[0].toLowerCase(Locale.US).trim();
 		if (actionCommand.equals("")) {
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.FOOL_ME);
+			throw new RoutingException(RoutingExceptionType.FOOL_ME);
 		}
 
 		Action action = getAction(actionCommand);
@@ -121,14 +116,14 @@ public final class Router {
 			actionName = actionData[1];
 			break;
 		default:
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.NOT_VALID_COMMAND, actionCommand);
+			throw new RoutingException(RoutingExceptionType.NOT_VALID_COMMAND,
+					actionCommand);
 		}
 
 		Map<String, Action> availableActions = this.actions.get(actionName);
 		if (availableActions == null) {
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.NOT_VALID_COMMAND, actionCommand);
+			throw new RoutingException(RoutingExceptionType.NOT_VALID_COMMAND,
+					actionCommand);
 		}
 
 		Action action = null;
@@ -150,8 +145,8 @@ public final class Router {
 		}
 
 		if (action == null) {
-			throw ExceptionFactory.get(RoutingException.class,
-					RoutingExceptionType.NOT_VALID_COMMAND, actionCommand);
+			throw new RoutingException(RoutingExceptionType.NOT_VALID_COMMAND,
+					actionCommand);
 		}
 
 		return action;

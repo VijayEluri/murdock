@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import ba.stascus.Stascus;
 import ba.stascus.exceptions.ConfigurationException;
 import ba.stascus.exceptions.ConfigurationException.ConfigurationExceptionType;
-import ba.stascus.exceptions.ExceptionFactory;
 
 /**
  * Represents app's context (both configuration and environment information).
@@ -54,7 +53,7 @@ public final class Context {
 		 */
 		firstRun = !appHome.exists();
 		if (firstRun && !appHome.mkdirs()) {
-			throw ExceptionFactory.get(ConfigurationException.class,
+			throw new ConfigurationException(
 					ConfigurationExceptionType.UNABLE_CREATE_HOME,
 					Stascus.NAME, appHome.getAbsolutePath());
 		}
@@ -66,16 +65,13 @@ public final class Context {
 				this.configuration.loadFromXML(new FileInputStream(
 						configurationFile));
 			} catch (InvalidPropertiesFormatException e) {
-				throw ExceptionFactory.get(ConfigurationException.class,
+				throw new ConfigurationException(
 						ConfigurationExceptionType.INVALID_FORMAT_CONFIG, e);
 			} catch (FileNotFoundException e) {
-				ConfigurationException ce = ExceptionFactory.get(
-						ConfigurationException.class,
-						ConfigurationExceptionType.UNABLE_ACCESS_CONFIG, e,
-						configurationFile.getAbsolutePath());
-				logger.warn(e.getMessage(), ce);
+				logger.warn(ConfigurationExceptionType.UNABLE_ACCESS_CONFIG
+						.getMessage(configurationFile.getAbsoluteFile()), e);
 			} catch (IOException e) {
-				throw ExceptionFactory.get(ConfigurationException.class,
+				throw new ConfigurationException(
 						ConfigurationExceptionType.UNABLE_READ_CONFIG, e,
 						configurationFile.getAbsolutePath());
 			}
@@ -133,11 +129,11 @@ public final class Context {
 			this.configuration.storeToXML(new FileOutputStream(
 					configurationFile), null);
 		} catch (FileNotFoundException e) {
-			throw ExceptionFactory.get(ConfigurationException.class,
+			throw new ConfigurationException(
 					ConfigurationExceptionType.UNABLE_WRITE_CONFIG, e,
 					configurationFile.getAbsolutePath());
 		} catch (IOException e) {
-			throw ExceptionFactory.get(ConfigurationException.class,
+			throw new ConfigurationException(
 					ConfigurationExceptionType.UNABLE_WRITE_CONFIG, e,
 					configurationFile.getAbsolutePath());
 		}

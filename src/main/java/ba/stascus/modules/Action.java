@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import ba.stascus.exceptions.ActionException;
 import ba.stascus.exceptions.ActionException.ActionExceptionType;
-import ba.stascus.exceptions.ExceptionFactory;
 import ba.stascus.utils.Context;
 
 /**
@@ -39,14 +38,14 @@ public final class Action implements Comparable<Object> {
 			Module module = constructor.newInstance(context);
 			method.invoke(module);
 		} catch (InstantiationException e) {
-			throw ExceptionFactory.get(ActionException.class,
-					ActionExceptionType.UNABLE_INVOKE, e, this.toString());
+			throw new ActionException(ActionExceptionType.UNABLE_INVOKE, e,
+					this.toString());
 		} catch (IllegalAccessException e) {
-			throw ExceptionFactory.get(ActionException.class,
-					ActionExceptionType.UNABLE_ACCESS, e, this.toString());
+			throw new ActionException(ActionExceptionType.UNABLE_ACCESS, e,
+					this.toString());
 		} catch (Exception e) {
-			throw ExceptionFactory.get(ActionException.class,
-					ActionExceptionType.UNABLE_INVOKE, e, this.toString());
+			throw new ActionException(ActionExceptionType.UNABLE_INVOKE, e,
+					this.toString());
 		}
 	}
 
