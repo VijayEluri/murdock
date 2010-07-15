@@ -1,5 +1,8 @@
 package hm.murdock.modules;
 
+import hm.murdock.modules.annotations.CanOmitFlag;
+import hm.murdock.modules.annotations.LeftOver;
+import hm.murdock.modules.annotations.ShortOption;
 import hm.murdock.utils.Context;
 
 /**

@@ -18,13 +18,12 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-
 import com.thoughtworks.paranamer.BytecodeReadingParanamer;
 import com.thoughtworks.paranamer.Paranamer;
 
-public class ActionParameters {
+public final class ActionParameters {
 
-	private final Map<String, ActionParameter> parameters = new HashMap<String, ActionParameter>();
+	private final Map<String, ActionParameter> declaredParameters = new HashMap<String, ActionParameter>();
 
 	private final Set<String> shortOptions = new HashSet<String>();
 
@@ -66,10 +65,15 @@ public class ActionParameters {
 				}
 			}
 
-			Option option = OptionBuilder.create(getShortOption(parameterName));
+			String shortOption = parameter.getOverridenShortOption();
+			if (shortOption == null) {
+				shortOption = getShortOption(parameterName);
+			}
+
+			Option option = OptionBuilder.create(shortOption);
 			options.addOption(option);
 
-			this.parameters.put(parameterName, parameter);
+			this.declaredParameters.put(parameterName, parameter);
 			this.shortOptions.add(option.getOpt());
 		}
 	}
@@ -78,37 +82,24 @@ public class ActionParameters {
 		Object[] parameters = null;
 
 		if (arguments.length > 0) {
-			if (!arguments[0].startsWith("-")
-					&& parametersByPosition[0].canOmitFlag()) {
-				String[] temp = new String[arguments.length + 1];
-				temp[0] = "--" + parametersByPosition[0].getName();
+			final String[] definitiveArguments = expandOmittedFirstArgument(arguments);
 
-				System.arraycopy(arguments, 0, temp, 1, arguments.length);
-				arguments = temp;
-			}
-
-			parameters = new Object[this.parameters.size()];
+			parameters = new Object[this.declaredParameters.size()];
 
 			GnuParser parser = new GnuParser();
 			try {
-				CommandLine line = parser.parse(options, arguments);
+				CommandLine line = parser.parse(options, definitiveArguments);
 				for (Option option : line.getOptions()) {
-					ActionParameter parameter = this.parameters.get(option
-							.getLongOpt());
+					ActionParameter parameter = this.declaredParameters
+							.get(option.getLongOpt());
 
 					int parameterPosition = parameter.getPosition();
 					if (option.hasArg()) {
 						if (option.hasArgs()) {
 							String[] optionArguments = line
 									.getOptionValues(option.getOpt());
-							Object array = Array.newInstance(
-									parameter.getDeclaredClass(),
-									optionArguments.length);
-
-							for (int i = 0; i < optionArguments.length; i++) {
-								String arg = optionArguments[i];
-								Array.set(array, i, parameter.deserialize(arg));
-							}
+							Object array = deserializeArray(parameter,
+									optionArguments);
 
 							parameters[parameterPosition] = array;
 						} else {
@@ -128,18 +119,7 @@ public class ActionParameters {
 
 					int finalPosition = parameters.length - 1;
 					if (parameters[finalPosition] == null) {
-						// TODO Convert to declared class...
-						parameters[finalPosition] = leftOver;
-
-						Object array = Array.newInstance(
-								lastParameter.getDeclaredClass(),
-								leftOver.length);
-
-						for (int i = 0; i < leftOver.length; i++) {
-							String arg = leftOver[i];
-							Array.set(array, i, lastParameter.deserialize(arg));
-						}
-
+						Object array = deserializeArray(lastParameter, leftOver);
 						parameters[finalPosition] = array;
 					} else {
 						Object[] current = (Object[]) parameters[finalPosition];
@@ -155,25 +135,57 @@ public class ActionParameters {
 			} catch (ParseException e) {
 				throw new ActionException(ActionExceptionType.INVOKING_ERROR, e);
 			}
-		}
 
-		for (int i = 0; i < parameters.length; i++) {
-			if (parameters[i] == null
-					&& parametersByPosition[i].getDeclaredClass().equals(
-							Boolean.class)) {
-				parameters[i] = false;
-			}
+			sanitizeNullBooleans(parameters);
 		}
 
 		return parameters;
 	}
 
-	private char getShortOption(String name) throws ActionException {
-		char letter;
+	private void sanitizeNullBooleans(Object[] finalParameters) {
+		for (int i = 0; i < finalParameters.length; i++) {
+			if (finalParameters[i] == null
+					&& parametersByPosition[i].getDeclaredClass().equals(
+							Boolean.class)) {
+				finalParameters[i] = false;
+			}
+		}
+	}
+
+	private Object deserializeArray(ActionParameter parameter,
+			String[] originalArray) {
+		Object array = Array.newInstance(parameter.getDeclaredClass(),
+				originalArray.length);
+
+		for (int i = 0; i < originalArray.length; i++) {
+			String arg = originalArray[i];
+			Array.set(array, i, parameter.deserialize(arg));
+		}
+
+		return array;
+	}
+
+	private String[] expandOmittedFirstArgument(String[] arguments) {
+		final String[] definitiveArguments;
+		if (!arguments[0].startsWith("-")
+				&& parametersByPosition[0].canOmitFlag()) {
+			definitiveArguments = new String[arguments.length + 1];
+			definitiveArguments[0] = "--" + parametersByPosition[0].getName();
+
+			System.arraycopy(arguments, 0, definitiveArguments, 1,
+					arguments.length);
+		} else {
+			definitiveArguments = arguments;
+		}
+		return definitiveArguments;
+	}
+
+	private String getShortOption(String name) throws ActionException {
+		String letter;
 		int i = 0;
 
 		do {
-			letter = name.charAt(i++);
+			letter = name.substring(i++, i);
 		} while (shortOptions.contains(letter) && i < name.length());
 
 		if (i >= name.length()) {

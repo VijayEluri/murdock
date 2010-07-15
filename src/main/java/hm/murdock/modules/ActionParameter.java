@@ -2,6 +2,10 @@ package hm.murdock.modules;
 
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ActionException.ActionExceptionType;
+import hm.murdock.modules.annotations.CanOmitFlag;
+import hm.murdock.modules.annotations.LeftOver;
+import hm.murdock.modules.annotations.Optional;
+import hm.murdock.modules.annotations.ShortOption;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -11,8 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-
-public class ActionParameter {
+public final class ActionParameter {
 	private AccessibleObject deserializer;
 
 	private final String name;
@@ -27,7 +30,7 @@ public class ActionParameter {
 
 	private final Set<Class<? extends Annotation>> annotationClasses = new HashSet<Class<? extends Annotation>>();
 
-	private final Class<?> klass;
+	private final Class<?> declaredClass;
 
 	/**
 	 * This constructor checks the next methods, using the first find, even if
@@ -57,22 +60,23 @@ public class ActionParameter {
 
 		Class<?> component = klass.getComponentType();
 		if (component != null) {
-			klass = component;
+			this.declaredClass = component;
 			this.isArray = true;
+		} else {
+			this.declaredClass = klass;
 		}
 
-		this.klass = klass;
 		try {
-			this.deserializer = klass
-					.getDeclaredMethod("valueOf", String.class);
-		} catch (Exception e) {
+			this.deserializer = declaredClass.getDeclaredMethod("valueOf",
+					String.class);
+		} catch (NoSuchMethodException e) {
 			try {
-				this.deserializer = (AccessibleObject) klass
+				this.deserializer = (AccessibleObject) declaredClass
 						.getDeclaredConstructor(String.class);
 				this.isConstructor = true;
 			} catch (Exception e1) {
 				throw new ActionException(
-						ActionExceptionType.CLASS_NOT_SUPPORTED,
+						ActionExceptionType.CLASS_NOT_SUPPORTED, e1,
 						klass.getSimpleName());
 			}
 		}
@@ -97,7 +101,7 @@ public class ActionParameter {
 	}
 
 	public Class<?> getDeclaredClass() {
-		return this.klass;
+		return this.declaredClass;
 	}
 
 	public int getPosition() {
@@ -122,5 +126,18 @@ public class ActionParameter {
 
 	public String getName() {
 		return this.name;
+	}
+
+	public String getOverridenShortOption() {
+		if (this.annotationClasses.contains(ShortOption.class)) {
+			for (Annotation annotation : annotations) {
+				if (annotation instanceof ShortOption) {
+					ShortOption shortOption = (ShortOption) annotation;
+					return shortOption.value();
+				}
+			}
+		}
+
+		return null;
 	}
 }

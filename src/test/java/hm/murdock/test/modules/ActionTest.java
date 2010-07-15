@@ -23,7 +23,7 @@ public class ActionTest {
 	public void testAction() throws SecurityException, NoSuchMethodException,
 			ActionException, ConfigurationException {
 		Action action = getTestingAction();
-		action.invoke(new Context(), "new", "-c", "alias:create", "warcry",
+		action.invoke(new Context(), "-inew", "-c", "alias:create", "warcry",
 				"--test", "alon");
 	}
 
