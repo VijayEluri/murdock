@@ -2,13 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>ba.stascus</groupId>
-	<artifactId>stascus</artifactId>
+	<groupId>hm.murdock</groupId>
+	<artifactId>murdock</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
-	<name>stascus</name>
-	<url>http://maven.apache.org</url>
+	<name>murdock</name>
+	<description>Howling mad command line app framework</description>
+	<url>http://github.com/imdario/murdock</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -62,12 +63,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.paranamer</groupId>
-			<artifactId>paranamer-parent</artifactId>
-			<version>2.2.1</version>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>com.thoughtworks.paranamer</groupId>
 			<artifactId>paranamer</artifactId>
 			<version>2.2.1</version>
 			<type>jar</type>
@@ -79,6 +74,10 @@
 		</dependency>
 	</dependencies>
 
+	<organization>
+		<name>I'm Dario</name>
+		<url>http://www.dario.im</url>
+	</organization>
 	<build>
 		<plugins>
 			<plugin>
