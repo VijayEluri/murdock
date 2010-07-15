@@ -17,13 +17,18 @@ import ba.stascus.utils.Context;
  */
 public final class Action implements Comparable<Object> {
 
+	private final ActionParameters parameters;
+
 	private final Method method;
 
 	private final Class<? extends Module> moduleClass;
 
 	private final String name;
 
-	public Action(Class<? extends Module> moduleClass, Method method) {
+	public Action(Class<? extends Module> moduleClass, Method method)
+			throws ActionException {
+		this.parameters = new ActionParameters(method);
+
 		this.method = method;
 		this.moduleClass = moduleClass;
 		this.name = this.moduleClass.getSimpleName().toLowerCase(Locale.US)
@@ -31,12 +36,13 @@ public final class Action implements Comparable<Object> {
 	}
 
 	// TODO Memoize created object?
-	public void invoke(Context context) throws ActionException {
+	public void invoke(Context context, String... arguments)
+			throws ActionException {
 		try {
 			Constructor<? extends Module> constructor = moduleClass
 					.getConstructor(Context.class);
 			Module module = constructor.newInstance(context);
-			method.invoke(module);
+			method.invoke(module, parameters.handle(arguments));
 		} catch (InstantiationException e) {
 			throw new ActionException(ActionExceptionType.UNABLE_INVOKE, e,
 					this.toString());
@@ -44,7 +50,7 @@ public final class Action implements Comparable<Object> {
 			throw new ActionException(ActionExceptionType.UNABLE_ACCESS, e,
 					this.toString());
 		} catch (Exception e) {
-			throw new ActionException(ActionExceptionType.UNABLE_INVOKE, e,
+			throw new ActionException(ActionExceptionType.INVOKING_ERROR, e,
 					this.toString());
 		}
 	}

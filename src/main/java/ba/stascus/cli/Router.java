@@ -8,7 +8,10 @@ import java.util.Set;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ba.stascus.Stascus;
 import ba.stascus.exceptions.ActionException;
 import ba.stascus.exceptions.MultipleRoutingException;
 import ba.stascus.exceptions.RoutingException;
@@ -62,9 +65,14 @@ public final class Router {
 					nameActions = new HashMap<String, Action>();
 				}
 
-				Action action = new Action(module, method);
-				nameActions.put(action.toString(), action);
-				actions.put(name, nameActions);
+				try {
+					Action action = new Action(module, method);
+					nameActions.put(action.toString(), action);
+					actions.put(name, nameActions);
+				} catch (ActionException e) {
+					Logger logger = LoggerFactory.getLogger(Stascus.NAME);
+					logger.warn("Ignoring action " + method.getName(), e);
+				}
 			}
 		}
 	}
@@ -74,34 +82,39 @@ public final class Router {
 	 * 
 	 * TODO Implement alias feature.
 	 * 
-	 * @param args
+	 * @param arguments
 	 *            Command-line arguments.
 	 * @throws RoutingException
 	 * @throws ActionException
 	 */
-	public void route(String... args) throws RoutingException, ActionException {
-		if (args == null) {
+	public void route(String... arguments) throws RoutingException,
+			ActionException {
+		if (arguments == null) {
 			// TODO Maybe route to Help:help action?
 			throw new RoutingException(RoutingExceptionType.MISSING_ARGUMENTS);
 		}
 
-		if (args.length == 0) {
+		if (arguments.length == 0) {
 			// TODO Maybe route to Help:help action?
 			throw new RoutingException(RoutingExceptionType.MISSING_ARGUMENTS);
 		}
 
-		if (args[0] == null) {
+		if (arguments[0] == null) {
 			// TODO Maybe route to Help:help action?
 			throw new RoutingException(RoutingExceptionType.MISSING_ARGUMENTS);
 		}
 
-		String actionCommand = args[0].toLowerCase(Locale.US).trim();
+		String actionCommand = arguments[0].toLowerCase(Locale.US).trim();
 		if (actionCommand.equals("")) {
 			throw new RoutingException(RoutingExceptionType.FOOL_ME);
 		}
 
+		String[] actionArguments = new String[arguments.length - 1];
+		System.arraycopy(arguments, 1, actionArguments, 0,
+				actionArguments.length);
+
 		Action action = getAction(actionCommand);
-		action.invoke(context); // TODO Arguments handling
+		action.invoke(context, actionArguments);
 	}
 
 	private Action getAction(String actionCommand) throws RoutingException {

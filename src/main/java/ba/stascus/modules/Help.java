@@ -21,7 +21,8 @@ public final class Help extends Module {
 	}
 
 	public void help() {
-		logger.info("Help!");
+		// TODO Enhance with dynamic module help registration.
+		logger.info("No help :)");
 	}
 
 	public void version() {

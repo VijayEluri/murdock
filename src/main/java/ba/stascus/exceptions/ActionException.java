@@ -20,7 +20,7 @@ public final class ActionException extends StascusException {
 	}
 
 	public enum ActionExceptionType implements StascusExceptionType {
-		UNABLE_INVOKE, UNABLE_ACCESS;
+		UNABLE_INVOKE, UNABLE_ACCESS, CLASS_NOT_SUPPORTED, UNABLE_ASSIGN_SHORT_OPTION, INVOKING_ERROR;
 
 		public String getMessage(Object... args) {
 			String format = null;
@@ -32,6 +32,18 @@ public final class ActionException extends StascusException {
 				break;
 			case UNABLE_ACCESS:
 				format = "Unable to access action '%s'";
+				break;
+			case CLASS_NOT_SUPPORTED:
+				format = "Argument class %1$s is not supported because it is missing %1$s.valueOf(String) or <init>(String) constructor";
+				break;
+			case UNABLE_ASSIGN_SHORT_OPTION:
+				format = "Unable to assign short option for '%s'";
+			case INVOKING_ERROR:
+				if (args.length == 0) {
+					message = "Error while invoking";
+				} else {
+					format = "Error while invoking action '%s'";
+				}
 				break;
 			default:
 				message = "Unknown";
