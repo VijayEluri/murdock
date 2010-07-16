@@ -13,10 +13,8 @@ import java.util.InvalidPropertiesFormatException;
 import java.util.Locale;
 import java.util.Properties;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Represents app's context (both configuration and environment information).
@@ -34,6 +32,8 @@ public final class Context {
 
 	private final File configurationFile;
 
+	private final Logger logger;
+
 	/**
 	 * 
 	 * This constructor set up application directory and loads user settings.
@@ -43,7 +43,7 @@ public final class Context {
 	public Context() throws ConfigurationException {
 		this.configuration = new Properties();
 		// TODO LazyLogger?
-		Logger logger = LoggerFactory.getLogger(Murdock.NAME);
+		logger = LoggerFactory.getLogger(Murdock.NAME);
 
 		String userHome = System.getProperty("user.home");
 		appHome = new File(userHome + "/."
@@ -141,5 +141,9 @@ public final class Context {
 		}
 
 		return oldValue;
+	}
+
+	public Logger getLogger() {
+		return this.logger;
 	}
 }

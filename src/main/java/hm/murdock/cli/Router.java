@@ -11,17 +11,17 @@ import hm.murdock.utils.Context;
 import hm.murdock.utils.Utils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Handles command-line args to the corresponding module's action.
@@ -57,9 +57,16 @@ public final class Router {
 		Set<Class<? extends Module>> modules = reflections
 				.getSubTypesOf(Module.class);
 
+		Set<Method> notOverridableMethods = new HashSet<Method>();
+		notOverridableMethods.addAll(Arrays.asList(Object.class.getMethods()));
+
 		this.actions = new HashMap<String, Map<String, Action>>();
 		for (Class<? extends Module> module : modules) {
 			for (Method method : module.getMethods()) {
+				if (notOverridableMethods.contains(method)) {
+					continue;
+				}
+
 				String name = method.getName();
 				Map<String, Action> nameActions = actions.get(name);
 

@@ -3,7 +3,7 @@ package hm.murdock.modules;
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ActionException.ActionExceptionType;
 import hm.murdock.modules.annotations.CanOmitFlag;
-import hm.murdock.modules.annotations.LeftOver;
+import hm.murdock.modules.annotations.HandlesLeftOverArgs;
 import hm.murdock.modules.annotations.Optional;
 import hm.murdock.modules.annotations.ShortOption;
 
@@ -121,7 +121,7 @@ public final class ActionParameter {
 	}
 
 	public boolean handlesLeftOverArgs() {
-		return this.annotationClasses.contains(LeftOver.class);
+		return this.annotationClasses.contains(HandlesLeftOverArgs.class);
 	}
 
 	public String getName() {

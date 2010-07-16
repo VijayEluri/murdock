@@ -54,11 +54,11 @@ public final class Murdock {
 	 * If multiple modules handle the same action name, it shows all
 	 * possibilities.
 	 * 
-	 * @param args
+	 * @param arguments
 	 */
-	public void delegate(String... args) {
+	public void delegate(String... arguments) {
 		try {
-			this.router.route(args);
+			this.router.route(arguments);
 		} catch (MultipleRoutingException e) {
 			logger.info(e.getLocalizedMessage());
 			for (Action action : e.getAvailableActions().values()) {

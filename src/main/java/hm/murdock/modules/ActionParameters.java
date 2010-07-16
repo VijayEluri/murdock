@@ -68,6 +68,12 @@ public final class ActionParameters {
 			String shortOption = parameter.getOverridenShortOption();
 			if (shortOption == null) {
 				shortOption = getShortOption(parameterName);
+			} else {
+				if (shortOptionIsDefined(shortOption)) {
+					throw new ActionException(
+							ActionExceptionType.UNABLE_ASSIGN_SHORT_OPTION,
+							shortOption);
+				}
 			}
 
 			Option option = OptionBuilder.create(shortOption);
@@ -186,7 +192,7 @@ public final class ActionParameters {
 
 		do {
 			letter = name.substring(i++, i);
-		} while (shortOptions.contains(letter) && i < name.length());
+		} while (shortOptionIsDefined(letter) && i < name.length());
 
 		if (i >= name.length()) {
 			throw new ActionException(
@@ -194,5 +200,9 @@ public final class ActionParameters {
 		}
 
 		return letter;
+	}
+
+	private boolean shortOptionIsDefined(String shortOption) {
+		return this.shortOptions.contains(shortOption);
 	}
 }

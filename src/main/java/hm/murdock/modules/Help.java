@@ -6,7 +6,6 @@ import hm.murdock.utils.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * 
  * @author Dario (i@dario.im)
@@ -27,6 +26,7 @@ public final class Help extends Module {
 	}
 
 	public void version() {
+		// TODO Allow to customize through properties.
 		logger.info(Murdock.NAME + " version " + Murdock.VERSION);
 	}
 }
