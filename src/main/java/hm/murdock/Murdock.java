@@ -5,21 +5,19 @@ import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ConfigurationException;
 import hm.murdock.exceptions.MultipleRoutingException;
 import hm.murdock.exceptions.RoutingException;
-import hm.murdock.modules.Action;
+import hm.murdock.modules.action.Action;
 import hm.murdock.utils.Context;
+
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * B.A. Stascus: I'm gonna end this, fool!
+ * Murdock is an easy and ligtweight framework for command line apps.
  * 
- * What's this 'bout? This is your fist against your overwhelming stream of
- * tasks, like your Twitter stream, you know.
- * 
- * Stascus is an app that aims to be easy and fast to use to keep track of your
- * tasks.
+ * CLI apps have been with us a long time and they deserve a new brand framework
+ * in these GUI times. BTW, GUI are evil, stop.
  * 
  * It features:
  * <ul>
@@ -34,16 +32,19 @@ public final class Murdock {
 
 	public static final String VERSION = "0.0.1";
 
-	public static final String NAME = Murdock.class.getSimpleName();
+	public static final String NAME = Murdock.class.getSimpleName()
+			.toLowerCase(Locale.US);
 
 	private final Router router;
 
 	private final Logger logger;
 
 	public Murdock() throws ConfigurationException {
-		Context context = new Context();
-		this.router = new Router(context);
+		this(new Context());
+	}
 
+	public Murdock(Context context) {
+		this.router = new Router(context);
 		this.logger = LoggerFactory.getLogger(Murdock.NAME);
 	}
 
@@ -65,9 +66,9 @@ public final class Murdock {
 				logger.info("\t" + action.toString());
 			}
 		} catch (RoutingException e) {
-			logger.error(e.getLocalizedMessage());
+			logger.error(e.getLocalizedMessage(), e);
 		} catch (ActionException e) {
-			logger.error(e.getLocalizedMessage());
+			logger.error(e.getLocalizedMessage(), e);
 		}
 	}
 

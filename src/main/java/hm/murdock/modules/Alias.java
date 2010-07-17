@@ -2,6 +2,7 @@ package hm.murdock.modules;
 
 import hm.murdock.modules.annotations.CanOmitFlag;
 import hm.murdock.modules.annotations.HandlesLeftOverArgs;
+import hm.murdock.modules.annotations.HelpDescription;
 import hm.murdock.utils.Context;
 
 /**
@@ -10,6 +11,7 @@ import hm.murdock.utils.Context;
  * @author Dario (i@dario.im)
  * 
  */
+@HelpDescription("Define or display aliases")
 public final class Alias extends Module {
 
 	public Alias(Context context) {
@@ -29,15 +31,18 @@ public final class Alias extends Module {
 	 * <li>first parameter can be without option</li>
 	 * </ul>
 	 */
+	@HelpDescription("Create an alias")
 	public void create(@CanOmitFlag String name,
 			@HandlesLeftOverArgs String... command) {
 
 	}
 
+	@HelpDescription("Delete an alias")
 	public void delete(@CanOmitFlag String name) {
 
 	}
 
+	@HelpDescription("List all created alias")
 	public void list() {
 
 	}

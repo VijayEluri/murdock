@@ -1,11 +1,11 @@
 package hm.murdock.modules;
 
-import java.util.Arrays;
-
 import hm.murdock.Murdock;
 import hm.murdock.exceptions.ConfigurationException;
+import hm.murdock.modules.annotations.HelpDescription;
 import hm.murdock.utils.Context;
 
+@HelpDescription("Interactive console")
 public class Console extends Module {
 
 	public Console(Context context) {
@@ -19,7 +19,7 @@ public class Console extends Module {
 					"Murdock is sad. No system console available :(");
 		}
 
-		Murdock murdock = new Murdock();
+		Murdock murdock = new Murdock(getContext());
 
 		boolean keepLooping = true;
 		do {

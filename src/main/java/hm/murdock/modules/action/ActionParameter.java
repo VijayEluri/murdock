@@ -1,4 +1,4 @@
-package hm.murdock.modules;
+package hm.murdock.modules.action;
 
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ActionException.ActionExceptionType;

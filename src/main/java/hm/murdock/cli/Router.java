@@ -1,27 +1,30 @@
 package hm.murdock.cli;
 
-import hm.murdock.Murdock;
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.MultipleRoutingException;
 import hm.murdock.exceptions.RoutingException;
 import hm.murdock.exceptions.RoutingException.RoutingExceptionType;
-import hm.murdock.modules.Action;
+import hm.murdock.modules.Addon;
+import hm.murdock.modules.Helper;
 import hm.murdock.modules.Module;
+import hm.murdock.modules.action.Action;
+import hm.murdock.modules.annotations.Hook;
 import hm.murdock.utils.Context;
 import hm.murdock.utils.Utils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handles command-line args to the corresponding module's action.
@@ -31,9 +34,15 @@ import org.slf4j.LoggerFactory;
  */
 public final class Router {
 
+	private static final Map<Context, Router> routers = new HashMap<Context, Router>();
+
 	private final Context context;
 
-	private final Map<String, Map<String, Action>> actions;
+	private final Map<String /* action */, Map<String /* module:action */, Action>> actions;
+
+	private final Map<Class<? extends Module>, List<Action>> modules;
+
+	private final Set<Method> notOverridableMethods;
 
 	/**
 	 * Constructor.
@@ -48,42 +57,119 @@ public final class Router {
 	 */
 	public Router(Context context) {
 		this.context = context;
+		routers.put(context, this);
+		this.modules = new HashMap<Class<? extends Module>, List<Action>>();
+		this.actions = new HashMap<String, Map<String, Action>>();
 
 		String modulesPackage = Utils.getCurrentParentPackage(Router.class)
 				+ ".modules";
 		Reflections reflections = new Reflections(modulesPackage,
 				new SubTypesScanner());
 
+		notOverridableMethods = new HashSet<Method>();
+		notOverridableMethods.addAll(Arrays.asList(Object.class.getMethods()));
+		notOverridableMethods.addAll(Arrays.asList(Addon.class.getMethods()));
+
+		Map<String, Map<Hook, Method>> trackedHooks = new HashMap<String, Map<Hook, Method>>();
+
+		registerModules(reflections, trackedHooks);
+		registerHelpers(reflections, trackedHooks);
+		registerHooks(trackedHooks);
+	}
+
+	private void registerHooks(Map<String, Map<Hook, Method>> hooks) {
+		for (String actionName : hooks.keySet()) {
+			Map<Hook, Method> actionHooks = hooks.get(actionName);
+			for (Hook hook : actionHooks.keySet()) {
+				Map<String, Action> actionsAvailable = this.actions
+						.get(actionName);
+				if (actionsAvailable == null) {
+					this.context.getLogger().warn(
+							"Ignoring hook " + hook.toString());
+				} else {
+					for (Action action : actionsAvailable.values()) {
+						if (action.canApply(hook)) {
+							action.addHook(hook, actionHooks.get(hook),
+									this.context);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void registerModules(Reflections reflections,
+			Map<String, Map<Hook, Method>> hooks) {
 		Set<Class<? extends Module>> modules = reflections
 				.getSubTypesOf(Module.class);
 
-		Set<Method> notOverridableMethods = new HashSet<Method>();
-		notOverridableMethods.addAll(Arrays.asList(Object.class.getMethods()));
-
-		this.actions = new HashMap<String, Map<String, Action>>();
 		for (Class<? extends Module> module : modules) {
+			List<Action> moduleActions = new ArrayList<Action>();
+
 			for (Method method : module.getMethods()) {
 				if (notOverridableMethods.contains(method)) {
 					continue;
 				}
 
-				String name = method.getName();
-				Map<String, Action> nameActions = actions.get(name);
+				Hook hookAnnotation = method.getAnnotation(Hook.class);
 
-				if (nameActions == null) {
-					nameActions = new HashMap<String, Action>();
+				// If it is not a hook...
+				if (hookAnnotation == null) {
+					String name = method.getName();
+					Map<String, Action> nameActions = actions.get(name);
+
+					if (nameActions == null) {
+						nameActions = new HashMap<String, Action>();
+					}
+
+					try {
+						Action action = new Action(module, method);
+
+						nameActions.put(action.toString(), action);
+						actions.put(name, nameActions);
+						moduleActions.add(action);
+					} catch (ActionException e) {
+						this.context.getLogger().warn(
+								"Ignoring action " + method.getName(), e);
+					}
+				} else {
+					trackHook(hooks, method, hookAnnotation);
+				}
+			}
+
+			this.modules.put(module, moduleActions);
+		}
+	}
+
+	private void registerHelpers(Reflections reflections,
+			Map<String, Map<Hook, Method>> hooks) {
+		for (Class<? extends Helper> helper : reflections
+				.getSubTypesOf(Helper.class)) {
+			for (Method method : helper.getMethods()) {
+				if (notOverridableMethods.contains(method)) {
+					continue;
 				}
 
-				try {
-					Action action = new Action(module, method);
-					nameActions.put(action.toString(), action);
-					actions.put(name, nameActions);
-				} catch (ActionException e) {
-					Logger logger = LoggerFactory.getLogger(Murdock.NAME);
-					logger.warn("Ignoring action " + method.getName(), e);
+				Hook hookAnnotation = method.getAnnotation(Hook.class);
+				// If it is not a hook...
+				if (hookAnnotation != null) {
+					trackHook(hooks, method, hookAnnotation);
 				}
 			}
 		}
+	}
+
+	private void trackHook(Map<String, Map<Hook, Method>> hooks, Method method,
+			Hook hookAnnotation) {
+		String actionName = hookAnnotation.action();
+		Map<Hook, Method> actionHooks = hooks.get(actionName);
+
+		if (actionHooks == null) {
+			actionHooks = new HashMap<Hook, Method>();
+		}
+
+		actionHooks.put(hookAnnotation, method);
+		hooks.put(actionName, actionHooks);
 	}
 
 	/**
@@ -126,7 +212,28 @@ public final class Router {
 		action.invoke(context, actionArguments);
 	}
 
-	private Action getAction(String actionCommand) throws RoutingException {
+	public Set<Class<? extends Module>> getModules() {
+		return this.modules.keySet();
+	}
+
+	public Set<Method> getNotOverridableMethods() {
+		return this.notOverridableMethods;
+	}
+
+	public List<Action> getActions(Class<? extends Module> module) {
+		return this.modules.get(module);
+	}
+
+	public Collection<Action> getActions() {
+		Map<String, Action> merged = new HashMap<String, Action>();
+		for (Map<String, Action> map : this.actions.values()) {
+			merged.putAll(map);
+		}
+
+		return merged.values();
+	}
+
+	public Action getAction(String actionCommand) throws RoutingException {
 		String actionName = null;
 		String[] actionData = actionCommand.split(":");
 
@@ -172,5 +279,9 @@ public final class Router {
 		}
 
 		return action;
+	}
+
+	public static Router getByContext(Context context) {
+		return routers.get(context);
 	}
 }

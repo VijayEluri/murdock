@@ -1,4 +1,4 @@
-package hm.murdock.modules;
+package hm.murdock.modules.action;
 
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ActionException.ActionExceptionType;
@@ -85,12 +85,10 @@ public final class ActionParameters {
 	}
 
 	public Object[] handle(String[] arguments) throws ActionException {
-		Object[] parameters = null;
+		Object[] parameters = new Object[this.declaredParameters.size()];
 
 		if (arguments.length > 0) {
 			final String[] definitiveArguments = expandOmittedFirstArgument(arguments);
-
-			parameters = new Object[this.declaredParameters.size()];
 
 			GnuParser parser = new GnuParser();
 			try {
@@ -146,6 +144,10 @@ public final class ActionParameters {
 		}
 
 		return parameters;
+	}
+
+	public Options getOptions() {
+		return this.options;
 	}
 
 	private void sanitizeNullBooleans(Object[] finalParameters) {

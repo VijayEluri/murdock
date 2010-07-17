@@ -4,8 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ConfigurationException;
-import hm.murdock.modules.Action;
 import hm.murdock.modules.Alias;
+import hm.murdock.modules.action.Action;
 import hm.murdock.utils.Context;
 
 import java.lang.reflect.InvocationTargetException;

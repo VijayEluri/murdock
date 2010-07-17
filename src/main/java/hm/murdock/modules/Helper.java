@@ -7,9 +7,9 @@ import hm.murdock.utils.Context;
  * @author Dario (i@dario.im)
  * 
  */
-public abstract class Module extends Addon {
+public abstract class Helper extends Addon {
 
-	public Module(Context context) {
+	public Helper(Context context) {
 		super(context);
 	}
 }
