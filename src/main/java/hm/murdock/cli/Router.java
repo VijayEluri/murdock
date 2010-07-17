@@ -103,6 +103,16 @@ public final class Router {
 		Set<Class<? extends Module>> modules = reflections
 				.getSubTypesOf(Module.class);
 
+		/*
+		 * Set<Method> notOverridableMethods = new HashSet<Method>();
+		 * notOverridableMethods
+		 * .addAll(Arrays.asList(Object.class.getMethods()));
+		 * 
+		 * Map<String, Map<Hook, Method>> hooks = new HashMap<String, Map<Hook,
+		 * Method>>(); this.actions = new HashMap<String, Map<String,
+		 * Action>>();
+		 */
+
 		for (Class<? extends Module> module : modules) {
 			List<Action> moduleActions = new ArrayList<Action>();
 
@@ -133,6 +143,7 @@ public final class Router {
 								"Ignoring action " + method.getName(), e);
 					}
 				} else {
+
 					trackHook(hooks, method, hookAnnotation);
 				}
 			}
