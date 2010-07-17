@@ -5,21 +5,17 @@ import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ConfigurationException;
 import hm.murdock.exceptions.MultipleRoutingException;
 import hm.murdock.exceptions.RoutingException;
-import hm.murdock.modules.Action;
+import hm.murdock.modules.action.Action;
 import hm.murdock.utils.Context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * B.A. Stascus: I'm gonna end this, fool!
+ * Murdock is an easy and ligtweight framework for command line apps.
  * 
- * What's this 'bout? This is your fist against your overwhelming stream of
- * tasks, like your Twitter stream, you know.
- * 
- * Stascus is an app that aims to be easy and fast to use to keep track of your
- * tasks.
+ * CLI apps have been with us a long time and they deserve a new brand framework
+ * in these GUI times. BTW, GUI are evil, stop.
  * 
  * It features:
  * <ul>

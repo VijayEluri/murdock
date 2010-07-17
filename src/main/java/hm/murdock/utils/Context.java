@@ -127,17 +127,19 @@ public final class Context {
 	public <T, E> E setProperty(ContextProperty<T> property, E value)
 			throws ConfigurationException {
 		E oldValue = (E) this.configuration.put(property.toString(), value);
-		try {
-			this.configuration.storeToXML(new FileOutputStream(
-					configurationFile), null);
-		} catch (FileNotFoundException e) {
-			throw new ConfigurationException(
-					ConfigurationExceptionType.UNABLE_WRITE_CONFIG, e,
-					configurationFile.getAbsolutePath());
-		} catch (IOException e) {
-			throw new ConfigurationException(
-					ConfigurationExceptionType.UNABLE_WRITE_CONFIG, e,
-					configurationFile.getAbsolutePath());
+		if (!property.isFlash()) {
+			try {
+				this.configuration.storeToXML(new FileOutputStream(
+						configurationFile), null);
+			} catch (FileNotFoundException e) {
+				throw new ConfigurationException(
+						ConfigurationExceptionType.UNABLE_WRITE_CONFIG, e,
+						configurationFile.getAbsolutePath());
+			} catch (IOException e) {
+				throw new ConfigurationException(
+						ConfigurationExceptionType.UNABLE_WRITE_CONFIG, e,
+						configurationFile.getAbsolutePath());
+			}
 		}
 
 		return oldValue;

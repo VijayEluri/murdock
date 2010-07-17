@@ -1,13 +1,15 @@
-package hm.murdock.modules;
+package hm.murdock.modules.action;
 
 import hm.murdock.exceptions.ActionException;
 import hm.murdock.exceptions.ActionException.ActionExceptionType;
+import hm.murdock.modules.Module;
+import hm.murdock.modules.annotations.Hook;
+import hm.murdock.modules.annotations.Hook.HookType;
 import hm.murdock.utils.Context;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Locale;
-
 
 /**
  * Represents an action provided by a module. It is associated to a method,
@@ -26,24 +28,30 @@ public final class Action implements Comparable<Object> {
 
 	private final String name;
 
+	private final ActionHooks hooks;
+
 	public Action(Class<? extends Module> moduleClass, Method method)
 			throws ActionException {
+		this.hooks = new ActionHooks();
 		this.parameters = new ActionParameters(method);
 
 		this.method = method;
 		this.moduleClass = moduleClass;
-		this.name = this.moduleClass.getSimpleName().toLowerCase(Locale.US)
-				+ ":" + this.method.getName();
+		this.name = buildName(this.moduleClass, this.method.getName());
 	}
 
 	// TODO Memoize created object?
 	public void invoke(Context context, String... arguments)
 			throws ActionException {
 		try {
-			Constructor<? extends Module> constructor = moduleClass
+			this.hooks.invokeHooks(HookType.PRE);
+
+			Constructor<? extends Module> constructor = this.moduleClass
 					.getConstructor(Context.class);
 			Module module = constructor.newInstance(context);
-			method.invoke(module, parameters.handle(arguments));
+			this.method.invoke(module, this.parameters.handle(arguments));
+
+			this.hooks.invokeHooks(HookType.POST);
 		} catch (InstantiationException e) {
 			throw new ActionException(ActionExceptionType.UNABLE_INVOKE, e,
 					this.toString());
@@ -54,6 +62,20 @@ public final class Action implements Comparable<Object> {
 			throw new ActionException(ActionExceptionType.INVOKING_ERROR, e,
 					this.toString());
 		}
+	}
+
+	public boolean canApply(Hook hook) {
+		return this.name.equals(buildName(hook.module(), hook.action()));
+	}
+
+	private String buildName(Class<? extends Module> actionModule,
+			String actionName) {
+		return actionModule.getSimpleName().toLowerCase(Locale.US) + ":"
+				+ actionName;
+	}
+
+	public void addHook(Hook hook, Method hookMethod, Context context) {
+		this.hooks.addHook(hook, hookMethod, context);
 	}
 
 	@Override

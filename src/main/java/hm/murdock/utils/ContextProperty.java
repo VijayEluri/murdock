@@ -1,5 +1,7 @@
 package hm.murdock.utils;
 
+import hm.murdock.cli.Router;
+
 /**
  * Enum-like class to handle all properties keys.
  * 
@@ -12,6 +14,9 @@ package hm.murdock.utils;
  */
 public class ContextProperty<T> {
 
+	public static final ContextProperty<Router> ROUTER = new ContextProperty<Router>(
+			"router", true);
+
 	public static final ContextProperty<String> TEST = new ContextProperty<String>(
 			"test");
 
@@ -21,8 +26,30 @@ public class ContextProperty<T> {
 
 	private String fullId;
 
+	private final boolean isFlash;
+
+	private final boolean isPrivileged;
+
 	protected ContextProperty(String id) {
+		this(id, false);
+	}
+
+	protected ContextProperty(String id, boolean flash) {
+		this(id, flash, false);
+	}
+
+	protected ContextProperty(String id, boolean flash, boolean privileged) {
 		this.id = id;
+		this.isFlash = flash;
+		this.isPrivileged = privileged;
+	}
+
+	public final boolean isFlash() {
+		return this.isFlash;
+	}
+
+	public final boolean isPrivileged() {
+		return this.isPrivileged;
 	}
 
 	@Override

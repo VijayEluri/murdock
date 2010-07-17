@@ -1,7 +1,5 @@
 package hm.murdock.modules;
 
-import java.util.Arrays;
-
 import hm.murdock.Murdock;
 import hm.murdock.exceptions.ConfigurationException;
 import hm.murdock.utils.Context;

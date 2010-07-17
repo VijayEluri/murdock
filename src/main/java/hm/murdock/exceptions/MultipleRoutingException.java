@@ -1,6 +1,6 @@
 package hm.murdock.exceptions;
 
-import hm.murdock.modules.Action;
+import hm.murdock.modules.action.Action;
 
 import java.util.Map;
 

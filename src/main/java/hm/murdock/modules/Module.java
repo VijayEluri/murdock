@@ -2,6 +2,8 @@ package hm.murdock.modules;
 
 import hm.murdock.utils.Context;
 
+import org.slf4j.Logger;
+
 /**
  * 
  * @author Dario (i@dario.im)
@@ -17,5 +19,9 @@ public abstract class Module {
 
 	public final Context getContext() {
 		return this.context;
+	}
+
+	public final Logger getLogger() {
+		return this.getContext().getLogger();
 	}
 }

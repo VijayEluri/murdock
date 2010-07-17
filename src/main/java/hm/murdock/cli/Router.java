@@ -1,13 +1,15 @@
 package hm.murdock.cli;
 
-import hm.murdock.Murdock;
 import hm.murdock.exceptions.ActionException;
+import hm.murdock.exceptions.ConfigurationException;
 import hm.murdock.exceptions.MultipleRoutingException;
 import hm.murdock.exceptions.RoutingException;
 import hm.murdock.exceptions.RoutingException.RoutingExceptionType;
-import hm.murdock.modules.Action;
 import hm.murdock.modules.Module;
+import hm.murdock.modules.action.Action;
+import hm.murdock.modules.annotations.Hook;
 import hm.murdock.utils.Context;
+import hm.murdock.utils.ContextProperty;
 import hm.murdock.utils.Utils;
 
 import java.lang.reflect.Method;
@@ -20,8 +22,6 @@ import java.util.Set;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handles command-line args to the corresponding module's action.
@@ -48,6 +48,16 @@ public final class Router {
 	 */
 	public Router(Context context) {
 		this.context = context;
+		try {
+			this.context.setProperty(ContextProperty.ROUTER, this);
+		} catch (ConfigurationException e) {
+			/*
+			 * Yeah, this is impossible :) In setProperty method only can throw
+			 * ConfigurationException if we write to disk and ROUTER property is
+			 * a flash property, so it never will write to the damn disk!
+			 */
+			this.context.getLogger().debug("Impossible error", e);
+		}
 
 		String modulesPackage = Utils.getCurrentParentPackage(Router.class)
 				+ ".modules";
@@ -60,27 +70,63 @@ public final class Router {
 		Set<Method> notOverridableMethods = new HashSet<Method>();
 		notOverridableMethods.addAll(Arrays.asList(Object.class.getMethods()));
 
+		Map<String, Map<Hook, Method>> hooks = new HashMap<String, Map<Hook, Method>>();
 		this.actions = new HashMap<String, Map<String, Action>>();
+
 		for (Class<? extends Module> module : modules) {
 			for (Method method : module.getMethods()) {
 				if (notOverridableMethods.contains(method)) {
 					continue;
 				}
 
-				String name = method.getName();
-				Map<String, Action> nameActions = actions.get(name);
+				Hook hookAnnotation = method.getAnnotation(Hook.class);
 
-				if (nameActions == null) {
-					nameActions = new HashMap<String, Action>();
+				// If it is not a hook...
+				if (hookAnnotation == null) {
+					String name = method.getName();
+					Map<String, Action> nameActions = actions.get(name);
+
+					if (nameActions == null) {
+						nameActions = new HashMap<String, Action>();
+					}
+
+					try {
+						Action action = new Action(module, method);
+						nameActions.put(action.toString(), action);
+						actions.put(name, nameActions);
+					} catch (ActionException e) {
+						this.context.getLogger().warn(
+								"Ignoring action " + method.getName(), e);
+					}
+				} else {
+					String actionName = hookAnnotation.action();
+					Map<Hook, Method> actionHooks = hooks.get(actionName);
+
+					if (actionHooks == null) {
+						actionHooks = new HashMap<Hook, Method>();
+					}
+
+					actionHooks.put(hookAnnotation, method);
+					hooks.put(actionName, actionHooks);
 				}
+			}
+		}
 
-				try {
-					Action action = new Action(module, method);
-					nameActions.put(action.toString(), action);
-					actions.put(name, nameActions);
-				} catch (ActionException e) {
-					Logger logger = LoggerFactory.getLogger(Murdock.NAME);
-					logger.warn("Ignoring action " + method.getName(), e);
+		for (String actionName : hooks.keySet()) {
+			Map<Hook, Method> actionHooks = hooks.get(actionName);
+			for (Hook hook : actionHooks.keySet()) {
+				Map<String, Action> actionsAvailable = this.actions
+						.get(actionName);
+				if (actionsAvailable == null) {
+					this.context.getLogger().warn(
+							"Ignoring hook " + hook.toString());
+				} else {
+					for (Action action : actionsAvailable.values()) {
+						if (action.canApply(hook)) {
+							action.addHook(hook, actionHooks.get(hook),
+									this.context);
+						}
+					}
 				}
 			}
 		}
