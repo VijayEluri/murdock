@@ -29,6 +29,8 @@
 		pre { background: #000; color: #fff; padding: 15px;}
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .highlight { text-align:center; padding-top:30px; font-style: italic; }
+    #yoda { color: #6E6E00; }
+    .warning { background: #2C4163; padding:15px; color: #FFF; text-align: center; font-weight: bold; }
 	</style>
 	
 </head>
@@ -46,9 +48,45 @@
         <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
     </div>
 
-    <div class="description">
-      Murdock - Howling mad command line app framework
-    </div>
+    <h2>What is Murdock?</h2>
+    <p>
+    <a href="http://imdario.github.com/murdock/">Murdock</a> is a howling mad command line app framework inspired in <a href="http://www.playframework.org/">Play! web framework</a> <em>though it is a bit different.</em> It is for command line, you know?
+    </p>
+    <p>
+    For more information, check out the <a href="http://wiki.github.com/imdario/murdock/">wiki</a>, which is under "construction" currently, and <span id="yoda">the source must you use, young padawan</span>.
+    </p>
+
+    <h2>Who created Murdock?</h2>
+    <p>
+    My name is <a href="http://www.dario.im">Dario</a> (<a href="http://github.com/imdario">imdario at GitHub</a>) and I will be very happy to recieve your comments, issues and suggestions about Murdock :)
+    </p>
+    <p>
+    Also, you can get more Murdock announcements following me at Twitter: <a href="http://www.twitter.com/im_dario">@im_dario</a>.
+    </p>
+    <p class="warning">
+    Murdock has ben built in just nine days, starting at July 9th 2010, so keep this in mind!
+    </p>
+
+    <h2>How Murdock is useful? (a.k.a. Features)</h2>
+    <ul>
+        <li><strong>Don't worry about command line stuff:</strong> just develop your modules (check out <a href="http://github.com/imdario/murdock/tree/master/src/main/java/hm/murdock/modules/">some examples at the repo</a>) and get everything out of box.</li>
+        <li><strong>REST/Git like command line arguments:</strong> backed by <a href="http://commons.apache.org/cli/">Apache Commons CLI project</a></li>
+        <li><strong>Stateless:</strong> Murdock doesn't assume any session state, even in its console mode</li>
+        <li><strong>Console mode:</strong> for those who feels that Java startup is too long, you can have your own console with Murdock, implemented as a module (yeah, that is, Murdock inside one Murdock's module)</li>
+        <li><strong>Pre and post hooks:</strong> as in <a href="http://git-scm.com/">Git</a>, you can attach your own code to other module's specific actions, before or after them. Of course, without modifying their functionality (maybe it would be a good thing?)</li>
+        <li><strong>Pure Java:</strong> you can implement new functionality in plain Java. Theorically, you should be able to create modules in any JVM language (if the resulting Java class is available in the class under hm.murdock.modules package).</li>
+    </ul>
+
+    <h2>Coming soon</h2>
+    <ul>
+        <li>Aliasing module to create alias for actions</li>
+        <li>Better wiki and overall documentation</li>
+        <li>Even a cool tutorial!</li>
+        <li>Command line tool to bootstrap Murdock projects (based in Murdock!)</li>
+        <li>Total customization: so no Murdock trace will appear in your app</li>
+        <li>Proper <a href="http://maven.apache.org/">Maven</a> repo (usable in <a href="http://docs.codehaus.org/display/GROOVY/Grape">Grape</a> and <a href="http://ant.apache.org/ivy/">Apache Ivy</a> too)</li>
+        <li>Maybe hot realoading while in console mode</li>
+    </ul>
 
     <h2>Download</h2>
     <p>
@@ -61,11 +99,13 @@
       <pre>$ git clone git://github.com/imdario/murdock</pre>
     </p>
 
+
     <div class="highlight"><img src="images/tshirt.png" /></div>
 
     <div class="highlight">
       Get the <a href="http://github.com/imdario/murdock">source code</a> on <a href="http://www.github.com">GitHub</a>.
     </div>
+    <div class="highlight">&nbsp;</div>
   </div>
 
   
