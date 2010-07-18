@@ -55,10 +55,11 @@ public final class Help extends Module {
 				Action action = router.getAction(command);
 				action.printHelp(new PrintWriter(writer));
 			} catch (RoutingException e) {
+				if (command.equals(getElementName(Hello.class))) {
+					throw e;
+				}
+
 				for (Class<? extends Module> module : router.getModules()) {
-					if (module.equals(Hello.class)) {
-						throw e;
-					}
 
 					if (getElementName(module).equals(command)) {
 						writer.append("usage: ");
