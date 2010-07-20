@@ -34,14 +34,38 @@ import org.reflections.scanners.SubTypesScanner;
  */
 public final class Router {
 
+	/**
+	 * Little hack which matches a context object with a router. This is used to
+	 * don't recreate the router again in the help module.
+	 * 
+	 * If I find a better way to do this, I will change this.
+	 */
 	private static final Map<Context, Router> routers = new HashMap<Context, Router>();
 
+	/**
+	 * App's context.
+	 */
 	private final Context context;
 
-	private final Map<String /* action */, Map<String /* module:action */, Action>> actions;
+	/**
+	 * Available actions.
+	 * 
+	 * Each map belongs to an action word (second part of "module:action"
+	 * syntax) and contains actions mapped with they full invoke name as
+	 * module:action.
+	 */
+	private final Map<String /* "action" */, Map<String /* "module:action" */, Action>> actions;
 
+	/**
+	 * Available modules and its actions.
+	 */
 	private final Map<Class<? extends Module>, List<Action>> modules;
 
+	/**
+	 * Set of methods not overridable in Murdock.
+	 * 
+	 * Right now they are methods from {@link Object} and {@link Addon} classes.
+	 */
 	private final Set<Method> notOverridableMethods;
 
 	/**
@@ -72,6 +96,7 @@ public final class Router {
 
 		Map<String, Map<Hook, Method>> trackedHooks = new HashMap<String, Map<Hook, Method>>();
 
+		// Let's register everything.
 		registerModules(reflections, trackedHooks);
 		registerHelpers(reflections, trackedHooks);
 		registerHooks(trackedHooks);
@@ -102,16 +127,6 @@ public final class Router {
 			Map<String, Map<Hook, Method>> hooks) {
 		Set<Class<? extends Module>> modules = reflections
 				.getSubTypesOf(Module.class);
-
-		/*
-		 * Set<Method> notOverridableMethods = new HashSet<Method>();
-		 * notOverridableMethods
-		 * .addAll(Arrays.asList(Object.class.getMethods()));
-		 * 
-		 * Map<String, Map<Hook, Method>> hooks = new HashMap<String, Map<Hook,
-		 * Method>>(); this.actions = new HashMap<String, Map<String,
-		 * Action>>();
-		 */
 
 		for (Class<? extends Module> module : modules) {
 			List<Action> moduleActions = new ArrayList<Action>();

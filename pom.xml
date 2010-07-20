@@ -28,33 +28,12 @@
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>codehaus-plugin-repository</id>
-			<name>Codehaus Plugin Repository</name>
-			<url>http://repository.codehaus.org</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>codehaus-plugin-snapshot-repository</id>
-			<name>Codehaus Plugin Snapshot Repository</name>
-			<url>http://snapshots.repository.codehaus.org</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.msgpack</groupId>
-			<artifactId>msgpack</artifactId>
-			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -90,9 +69,6 @@
 						It is good for Paranamer and its BytecodeReader ;) -->
 				</configuration>
 			</plugin>
-			<!--plugin> <groupId>com.thoughtworks.paranamer</groupId> <artifactId>paranamer-maven-plugin</artifactId> 
-				<version>2.2.1</version> <executions> <execution> <goals> <goal>generate</goal> 
-				</goals> <phase>compile</phase> </execution> </executions> </plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>

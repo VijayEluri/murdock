@@ -24,12 +24,25 @@ import org.slf4j.LoggerFactory;
  */
 public final class Context {
 
+	/**
+	 * Reference to our home directory (e.g. ~/.murdock/).
+	 */
 	private final File appHome;
 
+	/**
+	 * Loaded configuration from disk, located at {@link Context#appHome}.
+	 */
 	private final Properties configuration;
 
+	/**
+	 * Are we in our first run? This is true while {@link Context#appHome} 
+	 * doesn't exist.
+	 */
 	private final Boolean firstRun;
 
+	/**
+	 * Reference to configuration file.
+	 */
 	private final File configurationFile;
 
 	private final Logger logger;
@@ -70,6 +83,10 @@ public final class Context {
 				throw new ConfigurationException(
 						ConfigurationExceptionType.INVALID_FORMAT_CONFIG, e);
 			} catch (FileNotFoundException e) {
+				/*
+				 * If we don't find the configuration file, we continue. This
+				 * can change in future versions.
+				 */
 				logger.warn(ConfigurationExceptionType.UNABLE_ACCESS_CONFIG
 						.getMessage(configurationFile.getAbsoluteFile()), e);
 			} catch (IOException e) {
@@ -79,8 +96,12 @@ public final class Context {
 			}
 		} else {
 			if (!firstRun) {
-				logger.warn("Configuration file is missing at "
-						+ configurationFile.getAbsolutePath());
+				/*
+				 * If we don't find the configuration file, we continue. This
+				 * can change in future versions.
+				 */
+				logger.warn(ConfigurationExceptionType.UNABLE_ACCESS_CONFIG
+						.getMessage(configurationFile.getAbsoluteFile()));
 			}
 		}
 	}
@@ -110,6 +131,7 @@ public final class Context {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getProperty(ContextProperty<T> property) {
+		// TODO Add automatic prefix for inherited classes from ContextProperty.
 		return (T) this.configuration.get(property.toString());
 	}
 
@@ -126,6 +148,7 @@ public final class Context {
 	@SuppressWarnings("unchecked")
 	public <T, E> E setProperty(ContextProperty<T> property, E value)
 			throws ConfigurationException {
+		// TODO Add automatic prefix for inherited classes from ContextProperty.
 		E oldValue = (E) this.configuration.put(property.toString(), value);
 		if (!property.isFlash()) {
 			try {
