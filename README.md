@@ -2,7 +2,7 @@
 
 Murdock is a howling mad command line app framework inspired in [Play! web framework](http://www.playframework.org) _though it is a bit different. It is for command line, you know?
 
-For more information, check out the [wiki](http://wiki.github.com/imdario/murdock/), which is under "construction" currently, and the source must you use, young padawan.
+> This project is archived for good. It was my first open source project, so I'm going to keep it around.
 
 # Who created Murdock?
 
@@ -20,14 +20,3 @@ Also, you can get more Murdock announcements following me at Twitter: [@im_dario
 - **Console mode:** for those who feels that Java startup is too long, you can have your own console with Murdock, implemented as a module (yeah, that is, Murdock inside one Murdock's module)
 - **Pre and post hooks:** as in [Git](http://git-scm.org/), you can attach your own code to other module's specific actions, before or after them. Of course, without modifying their functionality (maybe it would be a good thing?)
 - **Pure Java:** you can implement new functionality in plain Java. Theorically, you should be able to create modules in any JVM language (if the resulting Java class is available in the class under hm.murdock.modules package).
-
-# Coming soon
-
-- Aliasing module to create alias for actions
-- Better wiki and overall documentation
-- Even a cool tutorial!
-- Command line tool to bootstrap Murdock projects (based in Murdock!)
-- Total customization: so no Murdock trace will appear in your app
-- Proper Maven repo (usable in Grape and Apache Ivy too)
-- Maybe hot realoading while in console mode
-
